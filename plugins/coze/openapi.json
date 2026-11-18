@@ -1,0 +1,396 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "聚搜GO Jusou Search",
+    "description": "聚合搜索：一个 Key 调 8 个搜索引擎（Exa/Tavily/Serper/SerpApi/Brave/博查/百度/AnySearch），按积分计费、失败不扣分。",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://jusouai.cn"
+    }
+  ],
+  "paths": {
+    "/v1/search": {
+      "post": {
+        "operationId": "search",
+        "summary": "统一搜索",
+        "description": "一种写法调任意引擎，返回统一结构。想用某家就指定 engine；不指定则用默认引擎；想对比就传 engines。返回的 engine 字段与响应头 x-engine 是实际使用的引擎。某引擎不支持的公共参数返回 400 说明，不静默忽略。传 engines 数组时返回 by_engine 按引擎分组（每家各自的 results / points_charged / error），points_charged 为合计；只调你点名的引擎，不替换、不追加。",
+        "tags": [
+          "统一接口"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "request_id": "js-20261031120000-a1b2c3d4e5f6",
+                  "engine": "exa",
+                  "results": [
+                    {
+                      "title": "…",
+                      "url": "https://example.com/a",
+                      "snippet": "…",
+                      "content": "…",
+                      "published_at": "…",
+                      "score": null
+                    }
+                  ],
+                  "points_charged": 1,
+                  "points_tier": "standard",
+                  "billing": {
+                    "points": 1,
+                    "balance": 999,
+                    "summary": "本次：Exa -1 积分，剩余 999"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "engine": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "snippet": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "score": {
+                            "type": "number",
+                            "nullable": true
+                          }
+                        }
+                      }
+                    },
+                    "by_engine": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object"
+                      }
+                    },
+                    "points_charged": {
+                      "type": "integer"
+                    },
+                    "points_tier": {
+                      "type": "string"
+                    },
+                    "billing": {
+                      "$ref": "#/components/schemas/Billing"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_request：参数错误（网关拦截或引擎判定参数错）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized：缺少密钥或密钥无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "insufficient_points：积分不足",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "engine_not_found：引擎不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "rate_limited：超过套餐每秒请求数（排队超过上限）；engine_busy：引擎繁忙",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "engine_error：引擎暂时异常（已自动重试）",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "engine_unavailable：引擎暂不可用或暂未开放",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "engine": {
+                    "type": "string",
+                    "description": "引擎：exa / serpapi / tavily / serper / anysearch / brave / bocha / baidu。不填则用默认引擎（anysearch）；和 engines 二选一。失败不会自动换别家"
+                  },
+                  "engines": {
+                    "type": "array",
+                    "items": {},
+                    "description": "同时搜几个引擎，如 [\"a\", \"b\"]；只调你点名的引擎，各自按价目扣分，失败的那家不扣"
+                  },
+                  "merge": {
+                    "type": "boolean",
+                    "description": "多引擎时 true：另给一份去重合并的 results，每条带 engines 标出哪几家搜到"
+                  },
+                  "query": {
+                    "type": "string",
+                    "description": "搜索词"
+                  },
+                  "num_results": {
+                    "type": "integer",
+                    "description": "每个引擎返回条数 1-10；Exa 1-100（超过 10 条每多 10 条加收积分）；超出返回 400，不扣分"
+                  },
+                  "depth": {
+                    "type": "string",
+                    "description": "basic（默认，基础档）/ advanced / deep；引擎不支持时报错"
+                  },
+                  "time_range": {
+                    "type": "string",
+                    "description": "day / week / month / year"
+                  },
+                  "include_domains": {
+                    "type": "array",
+                    "items": {},
+                    "description": "只搜这些域名"
+                  },
+                  "exclude_domains": {
+                    "type": "array",
+                    "items": {},
+                    "description": "排除这些域名"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "语言，如 zh"
+                  },
+                  "raw": {
+                    "type": "boolean",
+                    "description": "true 时附带该引擎官方原生返回"
+                  },
+                  "extra": {
+                    "type": "object",
+                    "description": "引擎专属参数，原样透传"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              },
+              "example": {
+                "engine": "exa",
+                "query": "量子计算",
+                "num_results": 5
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/engines": {
+      "get": {
+        "operationId": "engines",
+        "summary": "引擎目录",
+        "description": "当前开放（live）与即将上线（coming）的引擎、简介与接口路径；只有 live 的引擎可以调用。",
+        "tags": [
+          "账户"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "example": {
+                  "engines": [
+                    {
+                      "name": "exa",
+                      "label": "Exa",
+                      "status": "live",
+                      "category": "网页搜索",
+                      "paths": [
+                        "/v1/exa/search"
+                      ]
+                    }
+                  ]
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "engines": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "best_for": {
+                            "type": "string"
+                          },
+                          "max_results": {
+                            "type": "integer"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "paths": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "capabilities": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "jsk_ 开头的 API Key"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "hint": {
+                "type": "string",
+                "description": "怎么办（给人看的一句话）"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          },
+          "request_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "Billing": {
+        "type": "object",
+        "description": "每次调用的返回里都有：本次扣分、剩余积分、一句话说明",
+        "properties": {
+          "points": {
+            "type": "integer"
+          },
+          "balance": {
+            "type": "integer"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "by_engine": {
+            "type": "object",
+            "description": "多引擎时每家扣分"
+          }
+        },
+        "required": [
+          "points",
+          "balance",
+          "summary"
+        ]
+      }
+    }
+  }
+}

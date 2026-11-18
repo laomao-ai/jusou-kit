@@ -191,7 +191,9 @@
                   },
                   "engines": {
                     "type": "array",
-                    "items": {},
+                    "items": {
+                      "type": "string"
+                    },
                     "description": "同时搜几个引擎，如 [\"a\", \"b\"]；只调你点名的引擎，各自按价目扣分，失败的那家不扣"
                   },
                   "merge": {
@@ -216,12 +218,16 @@
                   },
                   "include_domains": {
                     "type": "array",
-                    "items": {},
+                    "items": {
+                      "type": "string"
+                    },
                     "description": "只搜这些域名"
                   },
                   "exclude_domains": {
                     "type": "array",
-                    "items": {},
+                    "items": {
+                      "type": "string"
+                    },
                     "description": "排除这些域名"
                   },
                   "language": {

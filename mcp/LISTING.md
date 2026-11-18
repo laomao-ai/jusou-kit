@@ -12,3 +12,4 @@
 | awesome-mcp-servers | 一行条目 PR | GitHub PR | 待公开仓 |
 
 Skill 侧：ClawHub jusou-search@1.0.0 已提交（扫描 CLEAN、待平台转公开）；skills.sh 已可直装（npx skills add laomao-ai/jusou-kit），搜索索引待生效；SkillsMP 待自动收录。find 类发现机制按「索引收录 + 描述任务词匹配 + 安装量排序」运作，描述已中英双语埋词。
+| awesome-remote-mcp-servers（GitHub 清单） | PR 收录 | 免费、维护者审核 | 📝 2026-11-18 PR 已提交待合并：https://github.com/punkpeye/awesome-remote-mcp-servers/pull/5129 |

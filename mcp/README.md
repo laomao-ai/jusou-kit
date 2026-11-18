@@ -9,7 +9,7 @@
 claude mcp add --transport http jusou https://jusouai.cn/mcp --header "Authorization: Bearer <你的Key>"
 ```
 
-## 通用 mcpServers JSON（Cursor / Windsurf / 通义灵码等）
+## 通用 mcpServers JSON（Claude Code / VS Code 风格；Cursor / Windsurf / 通义灵码等字段名可能不同，如 Windsurf 用 `serverUrl`，不兼容时用下面的 stdio 桥）
 
 ```json
 {

@@ -1,6 +1,6 @@
 ---
 name: jusou-search
-description: 用聚搜GO（Jusou）给 Agent 联网搜索：一个 Key 调 8 个搜索引擎（Exa / Tavily / Serper / SerpApi / Brave / 博查 / 百度 / AnySearch），按积分计费、失败不扣分。用户要求联网搜索、查最新信息、找资料、核实事实、多引擎对比，或提到 Tavily/Exa/Serper 替代、聚合搜索时使用。Web search for AI agents: search the web, latest information, fact-checking, multi-engine search with one API key — a Tavily / Exa / Serper alternative.
+description: 用聚搜GO（Jusou）给 Agent 联网搜索：一个 Key 调 8 个搜索引擎（Exa / Tavily / Serper / SerpApi / Brave / 博查 / 百度 / AnySearch），按积分计费、失败不扣分。用户要求联网搜索、查最新信息、找资料、核实事实、多引擎对比，或提到 Tavily/Exa/Serper 替代、聚合搜索时使用。Web search for AI agents: search the web, latest information, fact-checking, multi-engine search with one API key — a Tavily / Exa / Serper alternative and a unified search API for AI agents.
 ---
 
 # 聚搜GO 联网搜索
@@ -18,13 +18,13 @@ description: 用聚搜GO（Jusou）给 Agent 联网搜索：一个 Key 调 8 个
 
 ## 怎么搜
 
-优先用随附脚本（零依赖 Python 3）：
+优先用随附脚本（零依赖 Python 3）。脚本在本 SKILL.md 同目录的 `scripts/` 下，下例 `$SKILL_DIR` 指本文件所在目录，先定位它再拼路径：
 
 ```bash
-python3 scripts/jusou_search.py "杭州天气"
-python3 scripts/jusou_search.py "GPT-5 review" --engine exa --num 5
-python3 scripts/jusou_search.py "新能源汽车销量" --engines baidu,bocha,exa --merge
-python3 scripts/jusou_search.py "财报" --engine tavily --depth advanced
+python3 "$SKILL_DIR/scripts/jusou_search.py" "杭州天气"
+python3 "$SKILL_DIR/scripts/jusou_search.py" "GPT-5 review" --engine exa --num 5
+python3 "$SKILL_DIR/scripts/jusou_search.py" "新能源汽车销量" --engines baidu,bocha,exa --merge
+python3 "$SKILL_DIR/scripts/jusou_search.py" "财报" --engine tavily --depth advanced
 ```
 
 也可以直接调统一接口 `POST https://jusouai.cn/v1/search`（Bearer 鉴权），参数同脚本。
@@ -38,16 +38,16 @@ python3 scripts/jusou_search.py "财报" --engine tavily --depth advanced
 | Google 网页/新闻/学术/购物 | `serper` |
 | 与 SerpApi 官方同形的 Google 结果 | `serpapi` |
 | 独立索引 | `brave` |
-| 中文网页（国内站覆盖） | `bocha`、`baidu`（要 AI 生成答案用 baidu 的 advanced 深度） |
-| 免费兜底 | `anysearch` |
+| 中文网页（国内站覆盖） | `bocha`、`baidu`（advanced 深度 = 百度 AI 搜索，直接生成答案） |
+| 默认引擎、多源聚合兜底 | `anysearch` |
 
-不指定 engine 用默认引擎；要对比就 `--engines a,b,c`（各自扣分）。
+不指定 engine 用默认引擎 anysearch；要对比就 `--engines a,b,c`（各自扣分）。
 
 ## 计费（心里有数，别乱烧）
 
-- basic 档多为 1 积分/次（serpapi 4、brave 2）；advanced/deep 更高（exa deep 4、tavily advanced 2、baidu AI 搜索 3）。
+- basic 档多为 1 积分/次（serpapi 4、brave 2）；高级档：exa advanced 2 / deep 4、tavily advanced 2、baidu advanced（AI 搜索）3。serper、serpapi、anysearch、bocha 只有 basic 档，传高级档会报 400。
 - 失败不扣分；每次返回都带本次扣分与剩余积分，余额不足会明确报错——这时停下来告诉用户去续费，不要反复重试。
-- Exa 超过 10 条结果每多 10 条加收积分，大批量抓取前先小样试。
+- Exa 最多可返回 100 条结果，超过 10 条后每多 10 条加收积分，大批量抓取前先小样试。
 
 ## 出错怎么办
 

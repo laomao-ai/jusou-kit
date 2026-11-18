@@ -2,7 +2,7 @@
 """聚搜GO MCP 的 stdio 桥（零依赖）：给只支持 stdio 的 MCP 客户端用。
 
 原理：把 stdin 的逐行 JSON-RPC 原样转发到远程 MCP（https://jusouai.cn/mcp，
-Streamable HTTP、无状态），响应逐行写回 stdout。业务逻辑全在远程，本脚本只是管道。
+Streamable HTTP、无状态），响应按 JSON / SSE 规范拆成逐行 JSON-RPC 写回 stdout。业务逻辑全在远程，本脚本只是管道。
 
 客户端配置示例（Claude Desktop / Cursor 等 stdio 型）：
   {
@@ -28,7 +28,16 @@ KEY = os.environ.get("JUSOU_API_KEY", "").strip()
 
 
 def forward(line: str):
-    """返回要写回 stdout 的一行（通知类无返回时返回 None）。"""
+    """返回要写回 stdout 的行列表（通知类无返回时为空列表）。"""
+    def synth(msg):
+        try:
+            req_id = json.loads(line).get("id")
+        except Exception:
+            req_id = None
+        if req_id is None:
+            return []
+        return [json.dumps({"jsonrpc": "2.0", "id": req_id,
+                            "error": {"code": -32000, "message": msg}})]
     req = urllib.request.Request(
         URL, method="POST", data=line.encode(),
         headers={"Authorization": "Bearer " + KEY,
@@ -36,31 +45,30 @@ def forward(line: str):
                  "Accept": "application/json, text/event-stream"})
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
+            ctype = r.headers.get_content_type() or ""
             text = r.read().decode()
     except urllib.error.HTTPError as e:
         try:
-            req_id = json.loads(line).get("id")
+            body = e.read().decode()
+            json.loads(body)
+            return [json.dumps(json.loads(body), ensure_ascii=False, separators=(",", ":"))]
         except Exception:
-            req_id = None
-        if req_id is None:
-            return None
-        return json.dumps({"jsonrpc": "2.0", "id": req_id,
-                           "error": {"code": -32000, "message": f"upstream HTTP {e.code}"}})
+            return synth(f"upstream HTTP {e.code}")
     except Exception as e:
-        try:
-            req_id = json.loads(line).get("id")
-        except Exception:
-            req_id = None
-        if req_id is None:
-            return None
-        return json.dumps({"jsonrpc": "2.0", "id": req_id,
-                           "error": {"code": -32000, "message": f"bridge: {e}"}})
+        return synth(f"bridge: {e}")
     if not text.strip():
-        return None
-    if "data:" in text[:64]:                       # SSE 包装时取最后一条 data
-        parts = [l[5:].strip() for l in text.splitlines() if l.startswith("data:")]
-        return parts[-1] if parts else None
-    return text.strip()
+        return []
+    if ctype == "text/event-stream" or text.lstrip().startswith("data:") or "\ndata:" in text:
+        msgs = []
+        for event in text.replace("\r\n", "\n").split("\n\n"):
+            data = "\n".join(l[5:].lstrip() for l in event.split("\n") if l.startswith("data:"))
+            if data.strip():
+                msgs.append(data)
+        return msgs
+    try:
+        return [json.dumps(json.loads(text), ensure_ascii=False, separators=(",", ":"))]
+    except Exception:
+        return [text.strip()]
 
 
 def main() -> int:
@@ -71,8 +79,7 @@ def main() -> int:
         line = line.strip()
         if not line:
             continue
-        out = forward(line)
-        if out:
+        for out in forward(line):
             sys.stdout.write(out + "\n")
             sys.stdout.flush()
     return 0

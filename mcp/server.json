@@ -1,1 +1,22 @@
-{"$schema":"https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json","description":"一个 Key 调 8 个搜索引擎的聚合搜索 MCP：Exa / Tavily / Serper / SerpApi / Brave / 博查 / 百度 / AnySearch，统一计费、失败不扣分。One API key for 8 search engines via remote MCP.","name":"io.github.laomao-ai/jusou","remotes":[{"headers":[{"description":"Bearer <你的聚搜GO API Key>（在 jusouai.cn 控制台获取，形如 Bearer jsk_...）","isRequired":true,"isSecret":true,"name":"Authorization"}],"type":"streamable-http","url":"https://jusouai.cn/mcp"}],"title":"聚搜GO Jusou — Aggregated Search (8 engines, 1 key)","version":"1.0.0","websiteUrl":"https://jusouai.cn"}
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "description": "聚合搜索 MCP：一个 Key 调 8 个搜索引擎（Exa/Tavily/Serper/Brave/博查/百度等），统一计费、失败不扣分。",
+  "name": "io.github.laomao-ai/jusou",
+  "remotes": [
+    {
+      "headers": [
+        {
+          "description": "Bearer <你的聚搜GO API Key>（在 jusouai.cn 控制台获取，形如 Bearer jsk_...）",
+          "isRequired": true,
+          "isSecret": true,
+          "name": "Authorization"
+        }
+      ],
+      "type": "streamable-http",
+      "url": "https://jusouai.cn/mcp"
+    }
+  ],
+  "title": "聚搜GO Jusou — Aggregated Search (8 engines, 1 key)",
+  "version": "1.0.0",
+  "websiteUrl": "https://jusouai.cn"
+}

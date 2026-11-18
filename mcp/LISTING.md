@@ -5,7 +5,7 @@
 | 目录 | 提交物 | 方式 | 状态 |
 |---|---|---|---|
 | Official MCP Registry | `server.json`（本目录） | `mcp-publisher` CLI + GitHub 登录 | ✅ 2026-11-18 已发布 io.github.laomao-ai/jusou@1.0.0，Registry API 可查 |
-| Glama | 托管端点表单 | 网站提交、人工审核 | 📝 2026-11-18 已提交待审核；另 Glama 每小时从官方 Registry 自动导入，双保险 |
+| Glama | 托管端点表单 | 网站提交、人工审核 | ✅ 2026-11-18 已上线（连接器形态）：https://glama.ai/mcp/connectors/cn.jusouai/go-jusou |
 | Smithery | — | — | ❌ 通道关闭（2026-11-18 实查）：已并入 Arcade、自助发布入口取消、代理服务 10-31 停运，现仅精选目录 215 个，不可自投 |
 | mcp.so | GitHub 仓 | 网站提交 | 待公开仓 |
 | 魔搭 MCP 广场 | 远程服务 | 平台提交（账号门槛待隔壁调研确认） | 待调研 |

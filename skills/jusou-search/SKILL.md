@@ -2,7 +2,7 @@
 name: jusou-search
 slug: jusou-search
 displayName: 聚搜GO 联网搜索
-version: 1.0.2
+version: 1.0.3
 summary: One API key for 8 search engines — web search, latest info and fact-checking for AI agents. 一个 Key 调 8 个搜索引擎，给 Agent 联网搜索、查最新信息与核实事实。
 license: MIT
 description: 用聚搜GO（Jusou）给 Agent 联网搜索：一个 Key 调 8 个搜索引擎（Exa / Tavily / Serper / SerpApi / Brave / 博查 / 百度 / AnySearch），按积分计费、失败不扣分。用户要求联网搜索、查最新信息、找资料、核实事实、多引擎对比，或提到 Tavily/Exa/Serper 替代、聚合搜索时使用。Web search for AI agents: search the web, latest information, fact-checking, multi-engine search with one API key — a Tavily / Exa / Serper alternative and a unified search API for AI agents. New users get 100 free points on sign-up (valid 7 days). 新用户注册赠送 100 积分（7 天有效）。
@@ -34,6 +34,23 @@ python3 "$SKILL_DIR/scripts/jusou_search.py" "earnings report" --engine tavily -
 
 You can also call the unified API directly: `POST https://jusouai.cn/v1/search` (Bearer auth), with the same parameters as the script.
 
+## Examples
+```text
+# User: "What's the weather in Hangzhou today?"
+$ python3 "$SKILL_DIR/scripts/jusou_search.py" "杭州天气" --engine bocha --num 3
+1. 2026年11月19日杭州天气预报
+   https://bocha.cn/share/7c867faf-48ae-49a6-9243-9cee3166cc61
+   2026年11月19日杭州天气预报: 11/19 (周四): 天气:晴,温度:14/6°C,风向风力:西南风<3级 …
+-- 本次：博查 -1 积分，剩余 129        (charged 1 point, balance 129 — printed on stderr)
+# User: "Verify the latest official height of Mount Everest for me."
+$ python3 "$SKILL_DIR/scripts/jusou_search.py" "珠穆朗玛峰最新高程" --engines exa,bocha --merge --num 3
+1. 习近平同尼泊尔总统班达里互致信函 共同宣布珠穆朗玛峰高程_中国政府网 (gov.cn)
+3. 8848.86米！珠穆朗玛峰最新高程公布_央视网
+   https://news.cctv.com/2020/12/09/ARTIf96rCeRLlKsVWjJ9i9G1201209.shtml
+   …中尼两国8日联合对外宣布，珠穆朗玛峰的最新高程为8848.86米…
+-- 本次：Exa -1 积分、博查 -1 积分，共 -2 积分，剩余 127        (charged 2 points, balance 127)
+```
+
 ## Choosing an engine
 
 | Scenario | Engine |
@@ -44,9 +61,13 @@ You can also call the unified API directly: `POST https://jusouai.cn/v1/search` 
 | Google results in the official SerpApi shape | `serpapi` |
 | Independent index | `brave` |
 | Chinese web pages (China-site coverage) | `bocha`, `baidu` (advanced depth = Baidu AI Search, generates an answer directly) |
+| "Find me a WeChat Official Account article about X" | `bocha`, `baidu` — append `site:mp.weixin.qq.com` to the query |
+| "See what Zhihu says about X" | `bocha`, `baidu` — append `site:zhihu.com` to the query |
+| "How do I fix this error?" (Stack Overflow) | `serper`, `exa` — append `site:stackoverflow.com` to the query |
+| "Check the official docs for X" | `exa`, `serper` — append `site:` + the official domain to the query |
 | Default engine, multi-source aggregation fallback | `anysearch` |
 
-Omit `engine` to use the default engine (anysearch). To compare, pass `--engines a,b,c` (each engine is charged separately).
+Omit `engine` to use the default engine (anysearch). To compare, pass `--engines a,b,c` (each engine is charged separately). **Fact-checking:** for a claim that matters, don't trust a single source — run 2–3 engines at once (`--engines exa,bocha,serper --merge`) and compare: if independent sources agree, it's likely solid; if they conflict, dig deeper before answering. This is just the server-side multi-engine search used deliberately, not extra logic in this skill.
 
 ## Pricing (keep it in mind, don't burn points)
 
@@ -89,6 +110,23 @@ python3 "$SKILL_DIR/scripts/jusou_search.py" "财报" --engine tavily --depth ad
 
 也可以直接调统一接口 `POST https://jusouai.cn/v1/search`（Bearer 鉴权），参数同脚本。
 
+## 示例
+```text
+# 用户：「杭州今天天气怎么样？」
+$ python3 "$SKILL_DIR/scripts/jusou_search.py" "杭州天气" --engine bocha --num 3
+1. 2026年11月19日杭州天气预报
+   https://bocha.cn/share/7c867faf-48ae-49a6-9243-9cee3166cc61
+   2026年11月19日杭州天气预报: 11/19 (周四): 天气:晴,温度:14/6°C,风向风力:西南风<3级 …
+-- 本次：博查 -1 积分，剩余 129
+# 用户：「珠穆朗玛峰现在到底多高？帮我核实一下。」
+$ python3 "$SKILL_DIR/scripts/jusou_search.py" "珠穆朗玛峰最新高程" --engines exa,bocha --merge --num 3
+1. 习近平同尼泊尔总统班达里互致信函 共同宣布珠穆朗玛峰高程_中国政府网 (gov.cn)
+3. 8848.86米！珠穆朗玛峰最新高程公布_央视网
+   https://news.cctv.com/2020/12/09/ARTIf96rCeRLlKsVWjJ9i9G1201209.shtml
+   …中尼两国8日联合对外宣布，珠穆朗玛峰的最新高程为8848.86米…
+-- 本次：Exa -1 积分、博查 -1 积分，共 -2 积分，剩余 127
+```
+
 ## 选引擎
 
 | 场景 | 引擎 |
@@ -99,9 +137,13 @@ python3 "$SKILL_DIR/scripts/jusou_search.py" "财报" --engine tavily --depth ad
 | 与 SerpApi 官方同形的 Google 结果 | `serpapi` |
 | 独立索引 | `brave` |
 | 中文网页（国内站覆盖） | `bocha`、`baidu`（advanced 深度 = 百度 AI 搜索，直接生成答案） |
+| 「找一篇讲 X 的公众号文章」 | `bocha`、`baidu`，查询词后加 `site:mp.weixin.qq.com` |
+| 「看看知乎怎么说 X」 | `bocha`、`baidu`，查询词后加 `site:zhihu.com` |
+| 「这个报错怎么修」（Stack Overflow） | `serper`、`exa`，查询词后加 `site:stackoverflow.com` |
+| 「查一下 X 的官方文档」 | `exa`、`serper`，查询词后加 `site:` + 官网域名 |
 | 默认引擎、多源聚合兜底 | `anysearch` |
 
-不指定 engine 用默认引擎 anysearch；要对比就 `--engines a,b,c`（各自扣分）。
+不指定 engine 用默认引擎 anysearch；要对比就 `--engines a,b,c`（各自扣分）。**事实核查：** 重要的说法别只信一家——用 `--engines exa,bocha,serper --merge` 一次搜 2–3 家对照：独立来源说法一致，可信度就高；互相打架就先深挖再回答。这只是把服务端现成的多引擎搜索用在核查上，Skill 里不另做逻辑。
 
 ## 计费（心里有数，别乱烧）
 

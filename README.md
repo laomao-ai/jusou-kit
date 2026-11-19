@@ -1,3 +1,5 @@
+<img src="assets/logo.svg" alt="聚搜GO（Jusou） logo" width="96" align="left">
+
 # 聚搜GO（Jusou）· 聚合搜索 API / MCP Server
 
 **一个 Key，调 8 个搜索引擎。** 查最新信息、核实事实、多引擎对比，一套接口搞定。给 AI Agent 配联网搜索时不用再逐家注册、逐家对接：

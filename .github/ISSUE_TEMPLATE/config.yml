@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 开发文档
+    url: https://jusouai.cn/docs
+    about: 参数、计费与各引擎文档先看这里
+  - name: 官网与控制台
+    url: https://jusouai.cn
+    about: 注册、拿 Key、查余额与账单

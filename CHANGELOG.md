@@ -14,7 +14,6 @@
 ### Removed
 
 - README 中的套餐价格信息（对外文档只保留引擎积分表，口径与生产文档对齐）
-- 过时的未标版本 Skill 压缩包 `skills/jusou-search.zip`（v1.0.0 老包，避免误装）
 
 ### Fixed
 

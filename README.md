@@ -12,6 +12,7 @@
   <a href="mcp/"><img src="https://img.shields.io/badge/MCP-Server-22c3a6.svg" alt="MCP Server"></a>
   <a href="skills/jusou-search/SKILL.md"><img src="https://img.shields.io/badge/Skill-1.0.3-1167d8.svg" alt="Skill 1.0.3"></a>
   <a href="#引擎与计费"><img src="https://img.shields.io/badge/Engines-8-22c3a6.svg" alt="8 engines"></a>
+  <a href="https://glama.ai/mcp/connectors/cn.jusouai/go-jusou"><img src="https://glama.ai/mcp/connectors/cn.jusouai/go-jusou/badges/score.svg" alt="Jusou MCP connector on Glama"></a>
 </p>
 
 <p align="center">
